@@ -10,6 +10,10 @@ class ApiView {
         echo json_encode($data);
     }
 
+    public function errorResponse($data, $status = 400) {
+      $this->response([ "error" => $data ], $status); 
+    }
+
     private function _requestStatus($code){
         $status = array(
           200 => "OK",

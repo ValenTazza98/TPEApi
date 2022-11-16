@@ -13,13 +13,11 @@ define('DB_PASS', '');
 
 
 require_once('./app/Controller/MovieController.php');
-require_once('./app/Controller/ProjectionController.php');
 require_once('./libs/Router.php');
 
 
 //Creo controladores 
 $movieController = new MovieController();
-$projectionController = new ProjectionController();
 
 
 // crea el router
@@ -31,12 +29,6 @@ $router->addRoute('movies/:ID', 'GET', 'movieController', 'getMovie');
 $router->addRoute('movies/:ID', 'DELETE', 'movieController', 'deleteMovie');
 $router->addRoute('movies', 'POST', 'movieController', 'insertMovie'); 
 $router->addRoute('movies/:ID', 'PUT', 'movieController', 'editMovie');
-
-$router->addRoute('projections', 'GET', 'projectionController', 'getProjections'); 
-$router->addRoute('projections/:ID', 'GET', 'ProjectionController', 'getProjection');
-$router->addRoute('projections/:ID', 'DELETE', 'projectionController', 'deleteProjection');
-$router->addRoute('projections', 'POST', 'projectionController', 'insertProjection'); 
-$router->addRoute('projections/:ID', 'PUT', 'projectionController', 'editProjection');
 
 // ejecuta la ruta (sea cual sea)
 $router->route($_GET["resource"], $_SERVER['REQUEST_METHOD']);

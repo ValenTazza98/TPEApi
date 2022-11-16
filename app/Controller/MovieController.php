@@ -1,6 +1,5 @@
 <?php
 require_once('./app/Model/MovieModel.php');
-require_once('./app/Model/ProjectionModel.php');
 require_once('./app/View/ApiView.php');
 
 class MovieController {
@@ -39,8 +38,8 @@ class MovieController {
             "img" => "img",
             "genre" => "genre",
             "duration" => "duration",
-            "ASC" => "ASC",
-            "DESC" => "DESC",
+            "asc" => "ASC",
+            "desc" => "DESC",
         ];
 
         if (isset($_GET['page'])) {
@@ -63,7 +62,7 @@ class MovieController {
                 $nametableSearch = $arrayNametable[$nametableSearch];
             }
             else {
-                $this->apiview->response("el valor $nametableSearch no esta en la tabla", 404);
+                return $this->apiview->errorResponse("el valor $nametableSearch no esta en la tabla", 404);
             }
             
         }
@@ -71,25 +70,31 @@ class MovieController {
         //ordenamiento por valor columna
         if (isset($_GET['orderby'])) {
             if (isset($_GET['direction'])) {
-                $direction = $_GET['direction'];
+                $direction = strtolower($_GET['direction']);
             } 
             $nametableOrder = $_GET['orderby'];
-            if (isset($arrayNametable[$nametableOrder]) && isset($arrayNametable[$direction] )) {
+
+            if (isset($arrayNametable[$nametableOrder])) {
                 $nametableOrder = $arrayNametable[$nametableOrder];
+            }
+            else {
+                return $this->apiview->errorResponse("el valor $nametableOrder no esta en la tabla", 404);
+            }
+
+            if (isset($arrayNametable[$direction] )) {
                 $direction = $arrayNametable[$direction];
             }
             else {
-                $this->apiview->response("el valor $nametableOrder no esta en la tabla", 404);
+                return $this->apiview->errorResponse("el valor $direction no esta en la tabla", 404);
             }
         }
         
         $movies = $this->moviemodel->getMovies($limit, $offset, $nametableSearch, $name, $nametableOrder, $direction);
         if (empty($movies)) {
-            $this->apiview->response("No existen elementos con estas caracteristicas", 404);
+            return $this->apiview->errorResponse("No existen elementos con estas caracteristicas", 404);
+        } else {
+            return $this->apiview->response($movies);
         }
-        $this->apiview->response($movies);
-
-        
     }
 
     public function getMovie($params = null) {
@@ -99,7 +104,7 @@ class MovieController {
         if ($movie) {
             $this->apiview->response($movie);
         } else {
-            $this->apiview->response("La tarea con el id=$id no existe", 404);
+            $this->apiview->errorResponse("La película con el id=$id no existe", 404);
         }
     }
 
@@ -107,7 +112,7 @@ class MovieController {
         $movie = $this->getData();
 
         if (empty($movie->title) || empty($movie->description) || empty($movie->img) || empty($movie->genre) || empty($movie->duration)) {
-            $this->apiview->response("Complete los datos", 400);
+            $this->apiview->errorResponse("Complete los datos", 400);
         } else {
             $id = $this->moviemodel->insertMovie($movie->title, $movie->description, $movie->img, $movie->genre, $movie->duration);
             $movie = $this->moviemodel->getMovieById($id);
@@ -122,13 +127,13 @@ class MovieController {
         if ($movie) {
             $movie = $this->getData();
             if (empty($movie->title) || empty($movie->description) || empty($movie->img) || empty($movie->genre) || empty($movie->duration)) {
-                $this->apiview->response("Complete los datos", 400);
+                $this->apiview->errorResponse("Complete los datos", 400);
             } else {
                 $this->moviemodel->editMovie($id, $movie->title, $movie->description, $movie->img, $movie->genre, $movie->duration);
                 $this->apiview->response($movie);
             }
         } else {
-            $this->apiview->response("La tarea con el id=$id no existe", 404);
+            $this->apiview->errorResponse("La película con el id=$id no existe", 404);
         }
     }
 
@@ -138,9 +143,9 @@ class MovieController {
         $movie = $this->moviemodel->getMovieById($id);
         if ($movie) {
             $this->moviemodel->deleteMovie($id);
-            $this->apiview->response("Borrado con exito la pelicula con id $id");
+            $this->apiview->errorResponse("Borrado con exito la pelicula con id $id");
         } else {
-            $this->apiview->response("La tarea con el id=$id no existe", 404);
+            $this->apiview->errorResponse("La película con el id=$id no existe", 404);
         }
     }
 }
